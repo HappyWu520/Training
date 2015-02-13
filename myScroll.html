@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+	#display_border{
+		width: 270px;
+		height: 300px;
+		margin-left: 400px;
+		margin-top: 150px;
+		background-color: #e5e5e5;
+		border: 1px #000 solid;
+		position: relative;
+		overflow-y: hidden;
+	}
+
+	#to_scroll{
+		background-color: #e5e5e5;
+		width: 250px;
+		margin: 0;
+		padding: 10px 0; 
+		-webkit-user-select: none;
+		position: relative;
+		top: 0px;
+	}
+
+	#scroll_bar_bg{
+		background-color: #c8c9ca;
+		width: 10px;
+		height: 300px;
+		position: absolute;
+		left: 255px;
+		top: 0;
+		cursor: default;
+	}
+
+	#scroll_bar{
+		background-color: #1b94d3;
+		position: relative;
+		top: 0px;
+		border-radius: 5px;
+	}
+	</style>
+	<script src="./js/jquery.js"></script>
+</head>
+<body>
+	<div id="display_border">
+		<p id="to_scroll">
+			SEO全称：Search Engine Optimization，即搜索引擎优化。是指为了从搜索引擎中获得更多的免费流量，从网站结构、内容建设方案、用户互动传播、页面等角度进行合理规划，使网站更适合搜索引擎的检索原则的行为。
+			使网站更适合搜索引擎的检索原则又被称为对搜索引擎友好，对搜索引擎友好不仅能够提高SEO的效果，还能提高用户体验，因为这样会使搜索引擎中显示的网站相关信息对用户来说更有吸引力。为了说明什么是网站对搜索引擎友好，我们不妨看看对搜索引擎不友好的网站有哪些特征：
+			1、网页中大量采用图片或者Flash等富媒体（Rich Media）形式，没有可以检索的文本信息，而SEO最基本的就是文章SEO和图片SEO；
+			2、网页没有标题，或者标题中没有包含有效的关键词；
+			3、网页正文中有效关键词比较少（一般小于整文章2%~8%）；
+			4、网站导航系统让搜索引擎“看不懂”；
+			5、大量动态网页让搜索引擎无法检索；
+			6、没有被其他已经被搜索引擎收录的网站提供的链接；
+			7、网站中充斥大量欺骗搜索引擎的垃圾信息，如“过渡页”、“桥页”、颜色与背景色相同的文字；
+			8、网站中缺少原创的内容，完全照搬硬抄别人的内容等。
+		</p>
+
+		<div id="scroll_bar_bg">
+			<div id="scroll_bar">
+				
+			</div>
+		</div>
+	</div>
+	
+</body>
+</html>
+<script>
+	$(document).ready(function(){
+		$(document).onselectstart = function(){return false}
+		//根据比例生成滚动条高度
+		var scroll_bar_height = $('#display_border').innerHeight() / $('#to_scroll').innerHeight() * $('#scroll_bar_bg').height();
+		$('#scroll_bar').css("height",scroll_bar_height);
+
+		var dragging = false;
+		var y1;
+		var t1;
+
+		$('#scroll_bar').mousedown(function(event){
+			dragging = true;
+			y1 = event.clientY;
+			t1 = $(this).position().top;
+		});
+
+		if($('#scroll_bar')[0].setCapture){
+			$('#scroll_bar').mousemove(fnMove);
+			$('#scroll_bar').mouseup(fnUp);
+			$('#scroll_bar')[0].setCapture();
+		}else{
+			$(document).mousemove(fnMove);
+			$(document).mouseup(fnUp);
+		}
+
+		function fnMove(event){
+			if (dragging) {
+				var y2 = event.clientY;
+				var dy = y2 - y1
+				var t2 = t1 + dy;
+				//最大拖拽距离
+				var max_dy = $('#scroll_bar_bg').height()-$('#scroll_bar').height()
+				//限制滚动条拖动范围
+				if(t2 < 0)
+					t2 = 0;
+				else if(t2 > max_dy)
+					t2 = max_dy;
+				else
+					t2 = t2;
+				//设置滚动条位置
+				$('#scroll_bar').css("top",t2);
+
+				//等比例进行滚动
+				var ratio = t2 / $('#scroll_bar_bg').height();
+				var to_scroll_top = -($('#to_scroll').innerHeight() * ratio);
+
+				$('#to_scroll').css("top",to_scroll_top);
+			}
+		}
+
+		function fnUp(event){
+			dragging = false;
+		}
+
+		//鼠标滚轮事件
+		/*注册事件*/
+		if(document.addEventListener){
+		    $('#to_scroll')[0].addEventListener('DOMMouseScroll',scrollFunc,false);
+		}//W3C
+		$('#to_scroll')[0].onmousewheel = scrollFunc;//IE/Opera/Chrome
+
+		function scrollFunc(e){
+			var wheelDelta = getWheelDelta(e);
+			var r = 100/$('#to_scroll').innerHeight()*$('#scroll_bar_bg').height();
+			var dy = - (wheelDelta/120 * r);
+
+
+
+			t1 = $('#scroll_bar').position().top;
+
+			var t2 = t1 + dy;
+			//最大拖拽距离
+			var max_dy = $('#scroll_bar_bg').height()-$('#scroll_bar').height()
+			//限制滚动条拖动范围
+			if(t2 < 0)
+				t2 = 0;
+			else if(t2 > max_dy)
+				t2 = max_dy;
+			else
+				t2 = t2;
+			//设置滚动条位置
+			$('#scroll_bar').css("top",t2);
+
+			//等比例进行滚动
+			var ratio = t2 / $('#scroll_bar_bg').height();
+			var to_scroll_top = -($('#to_scroll').innerHeight() * ratio);
+
+			$('#to_scroll').css("top",to_scroll_top);
+		}
+
+		function getWheelDelta(event){
+			if(event.wheelDelta){
+				return event.wheelDelta;
+			}
+			else {
+				return -event.detail * 40;
+			}
+		}
+
+	});
+</script>
